@@ -56,77 +56,59 @@ function NinjaAvatar({ level, size = 160 }) {
   const bar = (r, c1, c2, color) => { for (let c = c1; c <= c2; c++) dot(c, r, color); };
   const box = (r1, r2, c1, c2, color) => { for (let r = r1; r <= r2; r++) bar(r, c1, c2, color); };
 
-  // ── HEADBAND / HAT ──────────────────────────────────────────────
+  // Chibi anime ninja — head wider than body, centered on cols 4–11
+
+  // ── HAT / HEADBAND ──────────────────────────────────────────
   if (level >= 15) {
-    // Kage tall hat
     box(0, 1, 5, 10, SC);
-    bar(2, 3, 12, TC);
+    bar(2, 4, 11, TC);
     bar(2, 6, 9, RC);
   } else {
-    bar(1, 5, 10, TC);      // headband (flush with head)
-    bar(1, 6, 9, RC);       // headband plate
+    bar(1, 4, 11, TC);             // headband (8 wide)
+    bar(1, 6, 9, RC);              // metal plate
   }
 
-  // ── HEAD (rows 2-5, cols 5-10) ──────────────────────────────
-  box(2, 5, 5, 10, MC);
-  dot(3, 6, EC); dot(3, 9, EC);   // eyes
-  if (level >= 6) dot(2, 7, RC);  // forehead mark (Jonin+)
+  // ── HEAD (rows 2–6, cols 4–11, 8 wide) ──────────────────────
+  box(2, 6, 4, 11, SC);           // full face (suit color)
+  box(5, 6, 4, 11, MC);           // lower mask overlay (darker)
+  // big anime eyes: dot(col, row, color)
+  dot(5, 4, EC); dot(6, 4, EC);   // left eye (cols 5-6, row 4)
+  dot(9, 4, EC); dot(10, 4, EC);  // right eye (cols 9-10, row 4)
+  if (level >= 6) { dot(7, 3, RC); dot(8, 3, RC); } // forehead mark (cols 7-8, row 3)
 
-  // ── NECK + PAULDRONS (rows 6-7) ─────────────────────────────
-  bar(6, 7, 8, SC);
-  box(6, 7, 3, 4, SC);   // left collar connecting shoulder to head
-  box(6, 7, 11, 12, SC); // right collar
+  // ── NECK (row 7, 4 wide) ────────────────────────────────────
+  bar(7, 6, 9, SC);
 
   // ── SCARF (Jonin+) ──────────────────────────────────────────
   if (tier.hasScarf) {
-    bar(5, 4, 11, RC);
-    bar(6, 4, 6, RC); bar(6, 9, 11, RC);
-    bar(7, 4, 4, RC); bar(7, 11, 11, RC);
-    bar(8, 4, 4, RC); bar(8, 11, 11, RC);
+    bar(7, 4, 11, RC);
+    dot(4, 8, RC); dot(11, 8, RC);  // col 4 row 8, col 11 row 8
+    dot(4, 9, RC); dot(11, 9, RC);  // col 4 row 9, col 11 row 9
   }
 
-  // ── SHOULDERS ───────────────────────────────────────────────
-  bar(7, 3, 12, SC);
+  // ── BODY (rows 8–13, 6 wide, cols 5–10) ─────────────────────
+  box(8, 13, 5, 10, SC);
+  bar(13, 5, 10, TC);             // belt
 
-  // ── TORSO (rows 8-12, cols 5-10) ────────────────────────────
-  box(8, 12, 5, 10, SC);
-  box(9, 11, 6, 9, MC);           // chest panel
-  if (level >= 6) { dot(10, 7, RC); dot(10, 8, RC); }
+  // ── LEGS (rows 14–18, 2 wide each with gap) ─────────────────
+  box(14, 18, 5, 6, SC);          // left leg
+  box(14, 18, 9, 10, SC);         // right leg
 
-  // ── ARMS (rows 8-12) ────────────────────────────────────────
-  box(8, 12, 3, 4, SC);           // left arm
-  box(8, 12, 11, 12, SC);         // right arm
-
-  // ── BELT ────────────────────────────────────────────────────
-  bar(13, 3, 12, TC);
-
-  // ── LEGS (rows 14-19) ───────────────────────────────────────
-  box(14, 19, 5, 7, SC);          // left leg
-  box(14, 19, 9, 11, SC);         // right leg
-
-  // ── BOOTS (rows 20-21) ──────────────────────────────────────
-  box(20, 21, 4, 7, MC);          // left boot
-  box(20, 21, 9, 12, MC);         // right boot
+  // ── BOOTS (rows 19–20, 4 wide each) ─────────────────────────
+  box(19, 20, 4, 7, MC);          // left boot (extends 1 past leg)
+  box(19, 20, 8, 11, MC);         // right boot
 
   // ── WEAPON ──────────────────────────────────────────────────
   if (tier.hasWeapon) {
     if (level < 10) {
-      // kunai: right side
-      box(5, 9, 13, 13, TC);
-      dot(10, 13, '#8B6914');
+      box(5, 9, 12, 12, TC);      // kunai blade (rows 5-9, col 12)
+      dot(12, 10, '#8B6914');     // handle (col 12, row 10)
     } else if (level < 15) {
-      // katana: tall right
-      box(3, 12, 13, 13, TC);
-      box(13, 14, 12, 14, '#2A1000');
+      box(3, 13, 12, 12, TC);     // katana
+      dot(14, 12, '#3A1800');
     } else {
-      // long katana: right
-      box(2, 13, 13, 13, TC);
-      box(14, 15, 12, 14, '#100500');
-      if (tier.hasDual) {
-        // second blade: left
-        box(2, 13, 2, 2, TC);
-        box(14, 15, 1, 3, '#100500');
-      }
+      box(1, 13, 12, 12, TC);
+      if (tier.hasDual) box(1, 13, 3, 3, TC);
     }
   }
 
