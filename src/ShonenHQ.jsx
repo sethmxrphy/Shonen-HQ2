@@ -90,6 +90,10 @@ function NinjaAvatar({ level, size = 160 }) {
   box(8, 13, 5, 10, SC);
   bar(13, 5, 10, TC);             // belt
 
+  // ── ARMS (rows 9–12, cols 3–4 and 11–12) ────────────────────
+  box(9, 12, 3, 4, SC);           // left arm
+  box(9, 12, 11, 12, SC);         // right arm
+
   // ── LEGS (rows 14–18, 2 wide each with gap) ─────────────────
   box(14, 18, 5, 6, SC);          // left leg
   box(14, 18, 9, 10, SC);         // right leg
