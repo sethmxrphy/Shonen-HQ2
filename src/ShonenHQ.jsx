@@ -23,12 +23,12 @@ const CSS = `
 
 // ── NINJA TIERS ───────────────────────────────────────────────────────────────
 const NINJA_TIERS = [
-  { minLevel:1,  name:"Genin",  rankColor:"#9CA3AF", suitColor:"#1A1A2E", maskColor:"#111122", trimColor:"#4A4A6A", eyeColor:"#9CA3AF", hasScarf:false, hasWeapon:false, hasDual:false, hasAura:false, particles:false, aura:null },
-  { minLevel:3,  name:"Chunin", rankColor:"#3B82F6", suitColor:"#0F1E3A", maskColor:"#0A1528", trimColor:"#3B82F6", eyeColor:"#60A5FA", hasScarf:false, hasWeapon:true,  hasDual:false, hasAura:false, particles:false, aura:null },
-  { minLevel:6,  name:"Jonin",  rankColor:"#8B5CF6", suitColor:"#1A1040", maskColor:"#110A30", trimColor:"#8B5CF6", eyeColor:"#A78BFA", hasScarf:true,  hasWeapon:true,  hasDual:false, hasAura:true,  particles:false, aura:"#8B5CF633" },
-  { minLevel:10, name:"ANBU",   rankColor:"#EF4444", suitColor:"#1A0A0A", maskColor:"#0A0505", trimColor:"#EF4444", eyeColor:"#FCA5A5", hasScarf:true,  hasWeapon:true,  hasDual:false, hasAura:true,  particles:true,  aura:"#EF444433" },
-  { minLevel:15, name:"Kage",   rankColor:"#F59E0B", suitColor:"#1C0A00", maskColor:"#120600", trimColor:"#F59E0B", eyeColor:"#FDE68A", hasScarf:true,  hasWeapon:true,  hasDual:true,  hasAura:true,  particles:true,  aura:"#F59E0B44" },
-  { minLevel:20, name:"LEGEND", rankColor:"#FF6B00", suitColor:"#0A0000", maskColor:"#050000", trimColor:"#FF6B00", eyeColor:"#FF6B00", hasScarf:true,  hasWeapon:true,  hasDual:true,  hasAura:true,  particles:true,  aura:"#FF6B0066" },
+  { minLevel:1,  name:"Genin",  rankColor:"#94A3B8", suitColor:"#1E3A5F", maskColor:"#0F2035", trimColor:"#4A90D9", eyeColor:"#E0F0FF", hasScarf:false, hasWeapon:false, hasDual:false, hasAura:false, particles:false, aura:null },
+  { minLevel:3,  name:"Chunin", rankColor:"#3B82F6", suitColor:"#152A50", maskColor:"#0A1830", trimColor:"#3B82F6", eyeColor:"#93C5FD", hasScarf:false, hasWeapon:true,  hasDual:false, hasAura:false, particles:false, aura:null },
+  { minLevel:6,  name:"Jonin",  rankColor:"#A855F7", suitColor:"#1E1040", maskColor:"#120A28", trimColor:"#A855F7", eyeColor:"#C084FC", hasScarf:true,  hasWeapon:true,  hasDual:false, hasAura:true,  particles:false, aura:"#A855F733" },
+  { minLevel:10, name:"ANBU",   rankColor:"#EF4444", suitColor:"#2A0A0A", maskColor:"#180505", trimColor:"#EF4444", eyeColor:"#FCA5A5", hasScarf:true,  hasWeapon:true,  hasDual:false, hasAura:true,  particles:true,  aura:"#EF444433" },
+  { minLevel:15, name:"Kage",   rankColor:"#F59E0B", suitColor:"#2A1200", maskColor:"#180800", trimColor:"#F59E0B", eyeColor:"#FDE68A", hasScarf:true,  hasWeapon:true,  hasDual:true,  hasAura:true,  particles:true,  aura:"#F59E0B44" },
+  { minLevel:20, name:"LEGEND", rankColor:"#FF6B00", suitColor:"#1A0500", maskColor:"#0A0200", trimColor:"#FF6B00", eyeColor:"#FF6B00", hasScarf:true,  hasWeapon:true,  hasDual:true,  hasAura:true,  particles:true,  aura:"#FF6B0066" },
 ];
 
 function getNinjaTier(lvl) {
@@ -56,62 +56,76 @@ function NinjaAvatar({ level, size = 160 }) {
   const bar = (r, c1, c2, color) => { for (let c = c1; c <= c2; c++) dot(c, r, color); };
   const box = (r1, r2, c1, c2, color) => { for (let r = r1; r <= r2; r++) bar(r, c1, c2, color); };
 
-  // headband / kage hat
+  // ── HEADBAND / HAT ──────────────────────────────────────────────
   if (level >= 15) {
-    bar(0, 2, 13, SC); box(1, 3, 4, 11, SC); bar(0, 6, 9, RC);
+    // Kage tall hat
+    box(0, 1, 5, 10, SC);
+    bar(2, 3, 12, TC);
+    bar(2, 6, 9, RC);
   } else {
-    bar(1, 1, 14, TC); bar(1, 5, 10, MC); bar(1, 6, 9, RC);
-    dot(15,1,TC); dot(15,2,TC); dot(14,3,TC);
+    bar(1, 5, 10, TC);      // headband (flush with head)
+    bar(1, 6, 9, RC);       // headband plate
   }
 
-  // head
-  box(2, 5, 3, 12, MC);
-  dot(4,3,EC); dot(5,3,EC); dot(10,3,EC); dot(11,3,EC);
-  if (level >= 6) { dot(4,2,RC); dot(5,3,RC); }
+  // ── HEAD (rows 2-5, cols 5-10) ──────────────────────────────
+  box(2, 5, 5, 10, MC);
+  dot(3, 6, EC); dot(3, 9, EC);   // eyes
+  if (level >= 6) dot(2, 7, RC);  // forehead mark (Jonin+)
 
-  // neck
-  bar(5, 6, 9, SC);
+  // ── NECK + PAULDRONS (rows 6-7) ─────────────────────────────
+  bar(6, 7, 8, SC);
+  box(6, 7, 3, 4, SC);   // left collar connecting shoulder to head
+  box(6, 7, 11, 12, SC); // right collar
 
-  // scarf (Jonin+)
+  // ── SCARF (Jonin+) ──────────────────────────────────────────
   if (tier.hasScarf) {
     bar(5, 4, 11, RC);
-    dot(3,6,RC); dot(2,7,RC); dot(2,8,RC); dot(3,9,RC); dot(2,10,RC); dot(3,11,RC);
-    dot(12,6,RC); dot(13,7,RC); dot(13,8,RC);
+    bar(6, 4, 6, RC); bar(6, 9, 11, RC);
+    bar(7, 4, 4, RC); bar(7, 11, 11, RC);
+    bar(8, 4, 4, RC); bar(8, 11, 11, RC);
   }
 
-  // torso
-  box(6, 9, 2, 13, SC);
-  box(7, 8, 4, 11, MC);
-  bar(9, 2, 13, TC);
-  dot(7,9,SC); dot(8,9,SC);
-  if (level >= 6) { dot(7,7,RC); dot(8,7,RC); }
+  // ── SHOULDERS ───────────────────────────────────────────────
+  bar(7, 3, 12, SC);
 
-  // arms
-  box(6, 8, 0, 1, SC); bar(9, 0, 1, MC);
-  box(6, 8, 14, 15, SC); bar(9, 14, 15, MC);
+  // ── TORSO (rows 8-12, cols 5-10) ────────────────────────────
+  box(8, 12, 5, 10, SC);
+  box(9, 11, 6, 9, MC);           // chest panel
+  if (level >= 6) { dot(10, 7, RC); dot(10, 8, RC); }
 
-  // legs
-  box(10, 14, 3, 6, SC);
-  box(10, 14, 9, 12, SC);
+  // ── ARMS (rows 8-12) ────────────────────────────────────────
+  box(8, 12, 3, 4, SC);           // left arm
+  box(8, 12, 11, 12, SC);         // right arm
 
-  // boots
-  box(15, 16, 2, 7, MC);
-  box(15, 16, 8, 13, MC);
+  // ── BELT ────────────────────────────────────────────────────
+  bar(13, 3, 12, TC);
 
-  // weapon
+  // ── LEGS (rows 14-19) ───────────────────────────────────────
+  box(14, 19, 5, 7, SC);          // left leg
+  box(14, 19, 9, 11, SC);         // right leg
+
+  // ── BOOTS (rows 20-21) ──────────────────────────────────────
+  box(20, 21, 4, 7, MC);          // left boot
+  box(20, 21, 9, 12, MC);         // right boot
+
+  // ── WEAPON ──────────────────────────────────────────────────
   if (tier.hasWeapon) {
     if (level < 10) {
-      box(4, 6, 16, 16, TC);
-      dot(16,7,'#6B4A14'); dot(16,8,'#6B4A14');
+      // kunai: right side
+      box(5, 9, 13, 13, TC);
+      dot(10, 13, '#8B6914');
     } else if (level < 15) {
-      box(2, 7, 16, 16, TC); bar(8, 15, 16, TC);
-      box(8, 10, 16, 16, '#2A1000');
+      // katana: tall right
+      box(3, 12, 13, 13, TC);
+      box(13, 14, 12, 14, '#2A1000');
     } else {
-      box(1, 7, 16, 16, TC); bar(8, 14, 16, TC);
-      box(8, 11, 16, 16, '#100500');
+      // long katana: right
+      box(2, 13, 13, 13, TC);
+      box(14, 15, 12, 14, '#100500');
       if (tier.hasDual) {
-        box(2, 7, -1, -1, TC); bar(8, -1, 0, TC);
-        box(8, 10, -1, -1, '#100500');
+        // second blade: left
+        box(2, 13, 2, 2, TC);
+        box(14, 15, 1, 3, '#100500');
       }
     }
   }
