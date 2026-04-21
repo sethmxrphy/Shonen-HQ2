@@ -40,222 +40,105 @@ function getNinjaTier(lvl) {
 // ── NINJA AVATAR ──────────────────────────────────────────────────────────────
 function NinjaAvatar({ level, size = 160 }) {
   const tier = getNinjaTier(level);
-  const s = size, cx = s / 2;
+  const { suitColor: SC, maskColor: MC, trimColor: TC, eyeColor: EC, rankColor: RC } = tier;
+
+  const P  = Math.floor(size / 22);
+  const ox = Math.floor((size - 16 * P) / 2);
+  const oy = P;
+
+  const rects = [];
+  let k = 0;
+  const dot = (c, r, color) => {
+    const x = ox + c * P, y = oy + r * P;
+    if (x < -P || y < -P || x > size || y > size) return;
+    rects.push(<rect key={k++} x={x} y={y} width={P} height={P} fill={color} shapeRendering="crispEdges"/>);
+  };
+  const bar = (r, c1, c2, color) => { for (let c = c1; c <= c2; c++) dot(c, r, color); };
+  const box = (r1, r2, c1, c2, color) => { for (let r = r1; r <= r2; r++) bar(r, c1, c2, color); };
+
+  // headband / kage hat
+  if (level >= 15) {
+    bar(0, 2, 13, SC); box(1, 3, 4, 11, SC); bar(0, 6, 9, RC);
+  } else {
+    bar(1, 1, 14, TC); bar(1, 5, 10, MC); bar(1, 6, 9, RC);
+    dot(15,1,TC); dot(15,2,TC); dot(14,3,TC);
+  }
+
+  // head
+  box(2, 5, 3, 12, MC);
+  dot(4,3,EC); dot(5,3,EC); dot(10,3,EC); dot(11,3,EC);
+  if (level >= 6) { dot(4,2,RC); dot(5,3,RC); }
+
+  // neck
+  bar(5, 6, 9, SC);
+
+  // scarf (Jonin+)
+  if (tier.hasScarf) {
+    bar(5, 4, 11, RC);
+    dot(3,6,RC); dot(2,7,RC); dot(2,8,RC); dot(3,9,RC); dot(2,10,RC); dot(3,11,RC);
+    dot(12,6,RC); dot(13,7,RC); dot(13,8,RC);
+  }
+
+  // torso
+  box(6, 9, 2, 13, SC);
+  box(7, 8, 4, 11, MC);
+  bar(9, 2, 13, TC);
+  dot(7,9,SC); dot(8,9,SC);
+  if (level >= 6) { dot(7,7,RC); dot(8,7,RC); }
+
+  // arms
+  box(6, 8, 0, 1, SC); bar(9, 0, 1, MC);
+  box(6, 8, 14, 15, SC); bar(9, 14, 15, MC);
+
+  // legs
+  box(10, 14, 3, 6, SC);
+  box(10, 14, 9, 12, SC);
+
+  // boots
+  box(15, 16, 2, 7, MC);
+  box(15, 16, 8, 13, MC);
+
+  // weapon
+  if (tier.hasWeapon) {
+    if (level < 10) {
+      box(4, 6, 16, 16, TC);
+      dot(16,7,'#6B4A14'); dot(16,8,'#6B4A14');
+    } else if (level < 15) {
+      box(2, 7, 16, 16, TC); bar(8, 15, 16, TC);
+      box(8, 10, 16, 16, '#2A1000');
+    } else {
+      box(1, 7, 16, 16, TC); bar(8, 14, 16, TC);
+      box(8, 11, 16, 16, '#100500');
+      if (tier.hasDual) {
+        box(2, 7, -1, -1, TC); bar(8, -1, 0, TC);
+        box(8, 10, -1, -1, '#100500');
+      }
+    }
+  }
 
   return (
-    <div style={{ position:"relative", width:s, height:s, margin:"0 auto" }}>
-      {/* Aura rings */}
-      {level >= 15 && <div style={{ position:"absolute", inset:-10, borderRadius:"50%", border:`1.5px solid ${tier.rankColor}`, animation:"legendAura 2s ease-in-out infinite", opacity:0.4 }}/>}
-      {level >= 20 && <div style={{ position:"absolute", inset:-22, borderRadius:"50%", border:`1px solid ${tier.rankColor}`, animation:"legendAura 3s ease-in-out infinite reverse", opacity:0.2 }}/>}
-      {tier.hasAura && <div style={{ position:"absolute", inset:0, borderRadius:"50%", background:`radial-gradient(ellipse at 50% 65%, ${tier.aura} 0%, transparent 70%)`, animation:"auraFloat 2.8s ease-in-out infinite" }}/>}
+    <div style={{ position:"relative", width:size, height:size, margin:"0 auto", imageRendering:"pixelated" }}>
+      {tier.hasAura && <div style={{ position:"absolute", inset:0, background:`radial-gradient(ellipse at 50% 60%, ${tier.aura} 0%, transparent 70%)`, animation:"auraFloat 2.8s ease-in-out infinite" }}/>}
       {tier.particles && [0,1,2,3,4].map(i => (
-        <div key={i} style={{ position:"absolute", width:3, height:3, borderRadius:"50%", background:tier.rankColor, top:`${20+i*12}%`, left:i%2===0?`${4+i*2}%`:`${76+i*2}%`, animation:`sparkle ${1.6+i*0.35}s ease-in-out infinite`, animationDelay:`${i*0.28}s`, boxShadow:`0 0 5px ${tier.rankColor}` }}/>
+        <div key={i} style={{ position:"absolute", width:P, height:P, background:RC, top:`${20+i*12}%`, left:i%2===0?`${4+i*3}%`:`${74+i*2}%`, animation:`sparkle ${1.6+i*0.35}s ease-in-out infinite`, animationDelay:`${i*0.28}s` }}/>
       ))}
-
-      <svg width={s} height={s} viewBox={`0 0 ${s} ${s}`} style={{ position:"relative", zIndex:2 }}>
+      {level >= 15 && <div style={{ position:"absolute", inset:-10, border:`2px solid ${RC}`, animation:"legendAura 2s ease-in-out infinite", opacity:0.4 }}/>}
+      {level >= 20 && <div style={{ position:"absolute", inset:-20, border:`1px solid ${RC}`, animation:"legendAura 3s ease-in-out infinite reverse", opacity:0.2 }}/>}
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ imageRendering:"pixelated", position:"relative", zIndex:2 }}>
         <defs>
-          <filter id="shadow"><feDropShadow dx="0" dy="1.5" stdDeviation="1.5" floodColor="#00000055"/></filter>
-          <filter id="glow"><feGaussianBlur stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <pattern id="scan" x="0" y="0" width={size} height={2} patternUnits="userSpaceOnUse">
+            <rect x={0} y={0} width={size} height={1} fill="#000"/>
+          </pattern>
         </defs>
-
-        {/* ── SCARF (behind body, Jonin+) ── */}
-        {tier.hasScarf && (
-          <g filter="url(#shadow)">
-            {/* Left tail */}
-            <path d={`M ${cx-6} ${s*0.35} C ${cx-14} ${s*0.42} ${cx-18} ${s*0.58} ${cx-14} ${s*0.72} C ${cx-10} ${s*0.82} ${cx-16} ${s*0.88} ${cx-12} ${s*0.95}`}
-              stroke={tier.rankColor} strokeWidth="5" fill="none" strokeLinecap="round" opacity="0.85"
-            />
-            {/* Right tail — shorter */}
-            <path d={`M ${cx+6} ${s*0.35} C ${cx+10} ${s*0.42} ${cx+8} ${s*0.52} ${cx+12} ${s*0.6}`}
-              stroke={tier.rankColor} strokeWidth="4" fill="none" strokeLinecap="round" opacity="0.7"
-            />
-            {/* Scarf wrap around neck */}
-            <ellipse cx={cx} cy={s*0.355} rx={s*0.1} ry={s*0.03} fill={tier.rankColor} opacity="0.9"/>
-          </g>
-        )}
-
-        {/* ── LEGS ── */}
-        <path d={`M ${cx-13} ${s*0.68} L ${cx-15} ${s*0.95} L ${cx-6} ${s*0.95} L ${cx-5} ${s*0.68} Z`}
-          fill={tier.suitColor} filter="url(#shadow)"
-        />
-        <path d={`M ${cx+5} ${s*0.68} L ${cx+6} ${s*0.95} L ${cx+15} ${s*0.95} L ${cx+13} ${s*0.68} Z`}
-          fill={tier.suitColor} filter="url(#shadow)"
-        />
-        {/* Boot wraps */}
-        <line x1={cx-15} y1={s*0.87} x2={cx-6} y2={s*0.87} stroke={tier.trimColor} strokeWidth="1.2" opacity="0.5"/>
-        <line x1={cx+6}  y1={s*0.87} x2={cx+15} y2={s*0.87} stroke={tier.trimColor} strokeWidth="1.2" opacity="0.5"/>
-        {/* Boot toe */}
-        <ellipse cx={cx-10} cy={s*0.955} rx={5} ry={2} fill={tier.suitColor}/>
-        <ellipse cx={cx+10} cy={s*0.955} rx={5} ry={2} fill={tier.suitColor}/>
-
-        {/* ── TORSO — shorter ── */}
-        <path d={`M ${cx-15} ${s*0.42} C ${cx-16} ${s*0.37} ${cx-12} ${s*0.34} ${cx} ${s*0.34} C ${cx+12} ${s*0.34} ${cx+16} ${s*0.37} ${cx+15} ${s*0.42} L ${cx+13} ${s*0.68} L ${cx-13} ${s*0.68} Z`}
-          fill={tier.suitColor} filter="url(#shadow)"
-        />
-        {/* Chest panel */}
-        <path d={`M ${cx-9} ${s*0.43} C ${cx-9} ${s*0.40} ${cx} ${s*0.38} ${cx+9} ${s*0.43} L ${cx+7} ${s*0.61} L ${cx-7} ${s*0.61} Z`}
-          fill={tier.maskColor} stroke={tier.trimColor} strokeWidth="0.4" opacity="0.8"
-        />
-        {/* Rank symbol */}
-        {level >= 6 && (
-          <text x={cx} y={s*0.545} textAnchor="middle" fontSize={s*0.072} fill={tier.rankColor} opacity="0.8" fontFamily="serif" fontWeight="bold">
-            {level>=20?"卍":level>=15?"忍":level>=10?"闇":"忍"}
-          </text>
-        )}
-        {/* Belt */}
-        <rect x={cx-13} y={s*0.665} width={26} height={s*0.022} rx={2} fill={tier.trimColor} opacity="0.8"/>
-        <rect x={cx-3.5} y={s*0.658} width={7} height={s*0.032} rx={1.5} fill={tier.trimColor} opacity="0.9"/>
-
-        {/* ── LEFT ARM — symmetric ── */}
-        <path d={`M ${cx-13} ${s*0.44} C ${cx-19} ${s*0.45} ${cx-25} ${s*0.54} ${cx-23} ${s*0.66} L ${cx-17} ${s*0.66} C ${cx-16} ${s*0.53} ${cx-11} ${s*0.47} ${cx-9} ${s*0.44} Z`}
-          fill={tier.suitColor}
-        />
-        {/* Left glove */}
-        <ellipse cx={cx-20} cy={s*0.675} rx={4.5} ry={3} fill={tier.maskColor} stroke={tier.trimColor} strokeWidth="0.4"/>
-
-        {/* ── RIGHT ARM — matching left ── */}
-        <path d={`M ${cx+13} ${s*0.44} C ${cx+19} ${s*0.45} ${cx+25} ${s*0.54} ${cx+23} ${s*0.66} L ${cx+17} ${s*0.66} C ${cx+16} ${s*0.53} ${cx+11} ${s*0.47} ${cx+9} ${s*0.44} Z`}
-          fill={tier.suitColor}
-        />
-        {/* Right glove */}
-        <ellipse cx={cx+20} cy={s*0.675} rx={4.5} ry={3} fill={tier.maskColor} stroke={tier.trimColor} strokeWidth="0.4"/>
-
-        {/* Arm trim lines */}
-        <line x1={cx-24} y1={s*0.57} x2={cx-16} y2={s*0.55} stroke={tier.trimColor} strokeWidth="1" opacity="0.35" strokeLinecap="round"/>
-        <line x1={cx+16} y1={s*0.55} x2={cx+24} y2={s*0.57} stroke={tier.trimColor} strokeWidth="1" opacity="0.35" strokeLinecap="round"/>
-
-        {/* ── NECK ── */}
-        <rect x={cx-5} y={s*0.325} width={10} height={s*0.04} rx={2} fill={tier.maskColor}/>
-
-        {/* ── HEAD ── */}
-        {/* Head shape */}
-        <ellipse cx={cx} cy={s*0.245} rx={s*0.125} ry={s*0.135} fill={tier.suitColor} filter="url(#shadow)"/>
-
-        {/* ── FULL NINJA MASK (all levels) ── */}
-        {/* Upper mask — forehead/top */}
-        <path d={`M ${cx-s*0.125} ${s*0.225} Q ${cx-s*0.125} ${s*0.11} ${cx} ${s*0.108} Q ${cx+s*0.125} ${s*0.11} ${cx+s*0.125} ${s*0.225}`}
-          fill={tier.maskColor}
-        />
-        {/* Lower mask — covers nose/mouth */}
-        <path d={`M ${cx-s*0.12} ${s*0.255} Q ${cx-s*0.12} ${s*0.33} ${cx} ${s*0.335} Q ${cx+s*0.12} ${s*0.33} ${cx+s*0.12} ${s*0.255}`}
-          fill={tier.maskColor}
-        />
-        {/* Mask seam line */}
-        <line x1={cx-s*0.12} y1={s*0.257} x2={cx+s*0.12} y2={s*0.257} stroke={tier.trimColor} strokeWidth="0.5" opacity="0.3"/>
-
-        {/* ── EYES (always glowing through mask) ── */}
-        <ellipse cx={cx-s*0.042} cy={s*0.245} rx={s*0.028} ry={s*0.018}
-          fill={tier.eyeColor} style={{filter:`drop-shadow(0 0 ${level>=10?5:2}px ${tier.eyeColor})`}}
-        />
-        <ellipse cx={cx+s*0.042} cy={s*0.245} rx={s*0.028} ry={s*0.018}
-          fill={tier.eyeColor} style={{filter:`drop-shadow(0 0 ${level>=10?5:2}px ${tier.eyeColor})`}}
-        />
-        {/* Eye shine */}
-        <ellipse cx={cx-s*0.036} cy={s*0.241} rx={s*0.008} ry={s*0.006} fill="#fff" opacity="0.5"/>
-        <ellipse cx={cx+s*0.048} cy={s*0.241} rx={s*0.008} ry={s*0.006} fill="#fff" opacity="0.5"/>
-
-        {/* Battle scar — visible on mask, Jonin+ */}
-        {level >= 6 && (
-          <line x1={cx-s*0.07} y1={s*0.215} x2={cx-s*0.025} y2={s*0.278}
-            stroke={tier.rankColor} strokeWidth="0.9" opacity="0.5" strokeLinecap="round"
-          />
-        )}
-
-        {/* ── HEADBAND ── */}
-        {level < 15 ? (
-          /* Standard headband */
-          <>
-            <rect x={cx-s*0.13} y={s*0.185} width={s*0.26} height={s*0.044} rx={3.5}
-              fill={tier.trimColor} opacity="0.9"
-            />
-            {/* Metal plate */}
-            <rect x={cx-s*0.07} y={s*0.189} width={s*0.14} height={s*0.034} rx={2}
-              fill={tier.maskColor} stroke={tier.rankColor} strokeWidth="0.6"
-            />
-            {/* Plate symbol */}
-            <text x={cx} y={s*0.216} textAnchor="middle" fontSize={s*0.048}
-              fill={tier.rankColor} opacity="0.9"
-            >{level>=10?"闇":level>=6?"忍":level>=3?"火":"木"}</text>
-            {/* Bandana tails */}
-            <path d={`M ${cx+s*0.13} ${s*0.2} C ${cx+s*0.16} ${s*0.215} ${cx+s*0.175} ${s*0.27} ${cx+s*0.155} ${s*0.33}`}
-              stroke={tier.trimColor} strokeWidth="3.5" fill="none" strokeLinecap="round" opacity="0.8"
-            />
-          </>
-        ) : (
-          /* Kage hat — level 15+ */
-          <>
-            <ellipse cx={cx} cy={s*0.163} rx={s*0.2} ry={s*0.036} fill={tier.suitColor} stroke={tier.rankColor} strokeWidth="0.5"/>
-            <path d={`M ${cx-s*0.085} ${s*0.163} L ${cx} ${s*0.075} L ${cx+s*0.085} ${s*0.163}`}
-              fill={tier.suitColor} stroke={tier.rankColor} strokeWidth="0.5"
-            />
-            <line x1={cx-s*0.2} y1={s*0.163} x2={cx+s*0.2} y2={s*0.163} stroke={tier.rankColor} strokeWidth="0.8" opacity="0.5"/>
-            <text x={cx} y={s*0.147} textAnchor="middle" fontSize={s*0.044} fill={tier.rankColor} opacity="0.8">影</text>
-          </>
-        )}
-
-        {/* ── WEAPONS ── */}
-        {tier.hasWeapon && (
-          <g style={{animation:"weaponGlow 2.2s ease-in-out infinite"}}>
-            {level < 10 ? (
-              /* Kunai — Chunin */
-              <g transform={`translate(${cx+27},${s*0.58}) rotate(22)`}>
-                <path d={`M 0 ${-s*0.13} L -1.4 ${-s*0.01} L 0 ${s*0.018} L 1.4 ${-s*0.01} Z`}
-                  fill={tier.trimColor} style={{filter:`drop-shadow(0 0 2px ${tier.rankColor})`}}
-                />
-                <rect x={-1} y={s*0.018} width={2} height={s*0.035} rx={0.5} fill="#3A2A14"/>
-                <rect x={-2} y={s*0.053} width={4} height={s*0.018} rx={1} fill="#5A4020"/>
-                <rect x={-0.8} y={s*0.071} width={1.6} height={s*0.04} rx={0.5} fill="#4A3520"/>
-              </g>
-            ) : level < 15 ? (
-              /* Katana — ANBU */
-              <g transform={`translate(${cx+19},${s*0.33}) rotate(26)`}>
-                <path d={`M 0 ${-s*0.3} L -1.3 ${-s*0.01} L 1.3 ${-s*0.01} Z`}
-                  fill={tier.trimColor} style={{filter:`drop-shadow(0 0 3px ${tier.rankColor}55)`}}
-                />
-                <line x1={-0.3} y1={-s*0.3} x2={-0.3} y2={-s*0.01} stroke="#fff" strokeWidth="0.35" opacity="0.35"/>
-                <ellipse cx={0} cy={-s*0.01} rx={4.5} ry={2.2} fill="#1A0A00" stroke={tier.rankColor} strokeWidth="0.5"/>
-                <rect x={-1.6} y={-s*0.01} width={3.2} height={s*0.075} rx={1.4} fill="#2A1408"/>
-                <line x1={-1.6} y1={s*0.022} x2={1.6} y2={s*0.022} stroke={tier.rankColor} strokeWidth="0.4" opacity="0.35"/>
-                <line x1={-1.6} y1={s*0.046} x2={1.6} y2={s*0.046} stroke={tier.rankColor} strokeWidth="0.4" opacity="0.35"/>
-              </g>
-            ) : (
-              /* Legendary dual blades — Kage/Legend */
-              <>
-                <g transform={`translate(${cx+21},${s*0.31}) rotate(24)`}>
-                  <path d={`M 0 ${-s*0.34} L -1.6 ${-s*0.01} L 1.6 ${-s*0.01} Z`}
-                    fill={tier.trimColor} style={{filter:`drop-shadow(0 0 5px ${tier.rankColor})`}}
-                  />
-                  <line x1={0} y1={-s*0.34} x2={0} y2={-s*0.01} stroke="#fff" strokeWidth="0.4" opacity="0.3"/>
-                  <ellipse cx={0} cy={-s*0.01} rx={5} ry={2.2} fill="#0A0500" stroke={tier.rankColor} strokeWidth="0.5"/>
-                  <rect x={-1.8} y={-s*0.01} width={3.6} height={s*0.072} rx={1.4} fill="#100500"/>
-                </g>
-                {tier.hasDual && (
-                  <g transform={`translate(${cx-21},${s*0.36}) rotate(-20)`}>
-                    <path d={`M 0 ${-s*0.26} L -1.3 ${-s*0.01} L 1.3 ${-s*0.01} Z`}
-                      fill={tier.trimColor} opacity="0.88" style={{filter:`drop-shadow(0 0 4px ${tier.rankColor})`}}
-                    />
-                    <ellipse cx={0} cy={-s*0.01} rx={4} ry={2} fill="#0A0500" stroke={tier.rankColor} strokeWidth="0.5"/>
-                    <rect x={-1.5} y={-s*0.01} width={3} height={s*0.062} rx={1.2} fill="#100500"/>
-                  </g>
-                )}
-              </>
-            )}
-          </g>
-        )}
-
-        {/* Orbiting ring — Legend */}
+        {rects}
+        <rect x={0} y={0} width={size} height={size} fill="url(#scan)" opacity="0.1" shapeRendering="crispEdges"/>
         {level >= 20 && (
-          <g style={{transformOrigin:`${cx}px ${s*0.52}px`, animation:"spin 5s linear infinite"}}>
-            <ellipse cx={cx} cy={s*0.52} rx={s*0.43} ry={s*0.095}
-              fill="none" stroke={tier.rankColor} strokeWidth="1.2"
-              strokeDasharray="3 4" opacity="0.45"
-            />
+          <g style={{ transformOrigin:`${size/2}px ${size*0.55}px`, animation:"spin 5s linear infinite" }}>
+            <rect x={P*2} y={size*0.5} width={size-P*4} height={Math.max(2,P/3|0)} fill="none" stroke={RC} strokeWidth={Math.max(1,P/3|0)} strokeDasharray={`${P} ${P}`} shapeRendering="crispEdges"/>
           </g>
         )}
       </svg>
-
-      {/* Rank badge */}
-      <div style={{ position:"absolute", bottom:0, left:"50%", transform:"translateX(-50%)", background:tier.rankColor, borderRadius:20, padding:"2px 12px", fontFamily:"'Bebas Neue',sans-serif", fontSize:11, letterSpacing:2, color:"#fff", whiteSpace:"nowrap", boxShadow:`0 0 10px ${tier.rankColor}88`, zIndex:10 }}>
+      <div style={{ position:"absolute", bottom:0, left:"50%", transform:"translateX(-50%)", background:RC, padding:`${P/3|0}px ${P*2}px`, fontFamily:"'Bebas Neue',sans-serif", fontSize:P*1.4|0, letterSpacing:2, color:"#fff", whiteSpace:"nowrap", boxShadow:`2px 2px 0 rgba(0,0,0,0.8), 0 0 ${P*2}px ${RC}88`, zIndex:10 }}>
         {tier.name}
       </div>
     </div>
